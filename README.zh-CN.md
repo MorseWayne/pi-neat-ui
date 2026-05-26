@@ -35,10 +35,18 @@
 
 ## 安装 / 加载
 
-### 方式一：从 GitHub 安装
+### 方式一：从 npm 安装
+
+通过 pi 的包管理命令安装已发布的 npm 版本：
 
 ```bash
-pi install github:MorseWayne/pi-neat-ui
+pi install npm:pi-neat-ui@0.3.3
+```
+
+如果希望安装到当前项目，并写入 `.pi/settings.json`，加上 `-l`：
+
+```bash
+pi install -l npm:pi-neat-ui@0.3.3
 ```
 
 然后启动 pi。扩展会默认应用 Pi 内置 dark 主题：
@@ -47,7 +55,19 @@ pi install github:MorseWayne/pi-neat-ui
 pi
 ```
 
-### 方式二：项目本地包
+也可以只临时试用一次，不写入配置：
+
+```bash
+pi -e npm:pi-neat-ui@0.3.3
+```
+
+### 方式二：从 GitHub 安装
+
+```bash
+pi install github:MorseWayne/pi-neat-ui
+```
+
+### 方式三：项目本地包
 
 把本目录放入项目中，并配置 `.pi/settings.json`：
 
@@ -57,7 +77,7 @@ pi
 }
 ```
 
-### 方式三：开发阶段直接加载
+### 方式四：开发阶段直接加载
 
 ```bash
 pi -e ./pi-neat-ui/extensions/beautify-ui.ts

@@ -35,10 +35,18 @@ A local **pi** UI polish package: extension + themes.
 
 ## Install / Load
 
-### Option 1: Install from GitHub
+### Option 1: Install from npm
+
+Install the published package through pi's package manager:
 
 ```bash
-pi install github:MorseWayne/pi-neat-ui
+pi install npm:pi-neat-ui@0.3.3
+```
+
+For a project-local install that is written to `.pi/settings.json`, add `-l`:
+
+```bash
+pi install -l npm:pi-neat-ui@0.3.3
 ```
 
 Then start pi. The extension applies Pi's built-in dark theme by default:
@@ -47,7 +55,19 @@ Then start pi. The extension applies Pi's built-in dark theme by default:
 pi
 ```
 
-### Option 2: Local project package
+You can also try it for one run without changing settings:
+
+```bash
+pi -e npm:pi-neat-ui@0.3.3
+```
+
+### Option 2: Install from GitHub
+
+```bash
+pi install github:MorseWayne/pi-neat-ui
+```
+
+### Option 3: Local project package
 
 Put this folder in your project and configure `.pi/settings.json`:
 
@@ -57,7 +77,7 @@ Put this folder in your project and configure `.pi/settings.json`:
 }
 ```
 
-### Option 3: Direct development loading
+### Option 4: Direct development loading
 
 ```bash
 pi -e ./pi-neat-ui/extensions/beautify-ui.ts
