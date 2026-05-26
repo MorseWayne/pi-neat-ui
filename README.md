@@ -40,13 +40,13 @@ A local **pi** UI polish package: extension + themes.
 Install the published package through pi's package manager:
 
 ```bash
-pi install npm:pi-neat-ui@0.3.3
+pi install npm:pi-neat-ui
 ```
 
 For a project-local install that is written to `.pi/settings.json`, add `-l`:
 
 ```bash
-pi install -l npm:pi-neat-ui@0.3.3
+pi install -l npm:pi-neat-ui
 ```
 
 Then start pi. The extension applies Pi's built-in dark theme by default:
@@ -58,7 +58,7 @@ pi
 You can also try it for one run without changing settings:
 
 ```bash
-pi -e npm:pi-neat-ui@0.3.3
+pi -e npm:pi-neat-ui
 ```
 
 ### Option 2: Install from GitHub

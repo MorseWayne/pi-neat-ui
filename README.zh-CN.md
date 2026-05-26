@@ -40,13 +40,13 @@
 通过 pi 的包管理命令安装已发布的 npm 版本：
 
 ```bash
-pi install npm:pi-neat-ui@0.3.3
+pi install npm:pi-neat-ui
 ```
 
 如果希望安装到当前项目，并写入 `.pi/settings.json`，加上 `-l`：
 
 ```bash
-pi install -l npm:pi-neat-ui@0.3.3
+pi install -l npm:pi-neat-ui
 ```
 
 然后启动 pi。扩展会默认应用 Pi 内置 dark 主题：
@@ -58,7 +58,7 @@ pi
 也可以只临时试用一次，不写入配置：
 
 ```bash
-pi -e npm:pi-neat-ui@0.3.3
+pi -e npm:pi-neat-ui
 ```
 
 ### 方式二：从 GitHub 安装
