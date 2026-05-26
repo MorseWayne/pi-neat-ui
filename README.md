@@ -72,7 +72,7 @@ The extension is enabled by default after loading.
 ```text
 /neat-ui                 # Toggle UI polish
 /neat-statusline         # Toggle built-in statusline
-/neat-statusline off     # Restore default/other footer
+/neat-statusline off     # Restore Pi built-in default footer
 /neat-statusline on      # Enable pi-neat-ui statusline
 /neat-tools              # Toggle compact/verbose tool rendering
 /neat-tools verbose      # Show full tool output
@@ -97,7 +97,7 @@ When the provider reports prompt-cache usage, the token segment shows cache data
 - `W` cache-write tokens, shown only when non-zero
 - `⚡` approximate cache hit rate: `cacheRead / (input + cacheRead + cacheWrite)`
 
-If you also have `@narumitw/pi-statusline` installed, disable one of the two statusline extensions to avoid footer override races.
+If you also have `@narumitw/pi-statusline` or another statusline/footer extension installed, disable one of them to avoid footer override races. `/neat-statusline off` clears pi-neat-ui's footer and restores Pi's built-in default footer; it cannot restore another extension's previous footer.
 
 ## `/neat-tools` vs `Ctrl+O`
 

@@ -72,7 +72,7 @@ pi -e ./pi-neat-ui/extensions/beautify-ui.ts --theme ./pi-neat-ui/themes/paper-d
 ```text
 /neat-ui                 # 开关美化
 /neat-statusline         # 开关内置 statusline
-/neat-statusline off     # 恢复默认/其他 footer
+/neat-statusline off     # 恢复 Pi 内置默认 footer
 /neat-statusline on      # 启用 pi-neat-ui statusline
 /neat-tools              # compact/verbose 之间切换
 /neat-tools verbose      # 显示完整工具输出
@@ -97,7 +97,7 @@ pi -e ./pi-neat-ui/extensions/beautify-ui.ts --theme ./pi-neat-ui/themes/paper-d
 - `W` cache-write tokens，仅非 0 时显示
 - `⚡` 近似缓存命中率：`cacheRead / (input + cacheRead + cacheWrite)`
 
-如果你同时安装了 `@narumitw/pi-statusline`，建议禁用其中一个 statusline 扩展，避免两个插件互相覆盖 footer。
+如果你同时安装了 `@narumitw/pi-statusline` 或其他 statusline/footer 扩展，建议禁用其中一个，避免多个插件互相覆盖 footer。`/neat-statusline off` 只会清除 pi-neat-ui 的 footer 并恢复 Pi 内置默认 footer，不能恢复另一个扩展之前设置的 footer。
 
 ## `/neat-tools` 和 `Ctrl+O` 的区别
 
