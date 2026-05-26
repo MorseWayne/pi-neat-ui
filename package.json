@@ -3,6 +3,26 @@
   "version": "0.2.3",
   "description": "Pi extension package: UI beautification, compact tool rendering, and theme presets",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MorseWayne/pi-neat-ui.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MorseWayne/pi-neat-ui/issues"
+  },
+  "homepage": "https://github.com/MorseWayne/pi-neat-ui#readme",
+  "files": [
+    "README.md",
+    "README.zh-CN.md",
+    "extensions",
+    "themes"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "pack:check": "npm pack --dry-run"
+  },
   "keywords": [
     "pi-package",
     "pi-extension",

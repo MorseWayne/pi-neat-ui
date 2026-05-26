@@ -88,6 +88,23 @@ pi -e ./pi-neat-ui/extensions/beautify-ui.ts --theme ./pi-neat-ui/themes/paper-d
 /neat-tools compact + 需要细节时按 Ctrl+O
 ```
 
+## 发布到 npm
+
+仓库已包含用于 npm 发布的 GitHub Actions workflow。
+
+1. 在 GitHub 仓库中添加 npm automation token，secret 名称为 `NPM_TOKEN`。
+2. 提升 `package.json` 版本号。
+3. 创建并推送匹配版本号的 tag，例如：
+
+```bash
+npm version patch
+git push --follow-tags
+```
+
+workflow 会用 `npm pack --dry-run` 校验包内容，并在 tag 触发时使用 npm provenance 发布。
+
+也可以在 GitHub Actions 页面手动运行 workflow，并设置 `publish=true`。
+
 ## 说明
 
 `/neat-tools compact` 不会影响工具执行，只改变工具结果在 TUI 中的展示方式。

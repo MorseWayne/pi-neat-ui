@@ -88,6 +88,23 @@ Recommended workflow:
 /neat-tools compact + Ctrl+O when details are needed
 ```
 
+## Publishing
+
+The repository includes a GitHub Actions workflow for npm publishing.
+
+1. Add an npm automation token as a GitHub repository secret named `NPM_TOKEN`.
+2. Bump `package.json` version.
+3. Create and push a matching tag, for example:
+
+```bash
+npm version patch
+git push --follow-tags
+```
+
+The workflow validates package contents with `npm pack --dry-run` and publishes tagged versions with npm provenance.
+
+You can also run the workflow manually from GitHub Actions with `publish=true`.
+
 ## Notes
 
 `/neat-tools compact` does not affect tool execution. It only changes how tool results are rendered in the TUI.
