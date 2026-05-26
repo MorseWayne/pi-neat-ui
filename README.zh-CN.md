@@ -10,14 +10,17 @@
 
 - 内置 powerline/emoji statusline，视觉风格保持 `@narumitw/pi-statusline` 的样式。
 - 缓存感知 token 段：
-  - `R` 表示 cache-read tokens；
-  - `W` 表示 cache-write tokens；
-  - `⚡` 表示近似缓存命中率。
+  - `R` 表示 cache-read tokens，即使为 0 也显示；
+  - `W` 表示 cache-write tokens，即使为 0 也显示；
+  - `⚡` 表示近似缓存命中率，即使为 `0%` 也显示。
+- 会话持续时间段（`⏱`）。
 - 自定义启动 Header。
 - 轻量编辑器提示 Widget。
 - 自定义 working indicator。
 - 工具输出紧凑渲染：
   - 折叠时只显示摘要，例如 `bash: done (3 lines)` 或 `grep: 12 matches`；
+  - 展开/verbose 模式回退到 pi 内置渲染器，保留语法/差异高亮；
+  - edit 调用保留 pi 的动态 diff 预览与增删行数；
   - 需要细节时按 `Ctrl+O` 展开。
 - 内置命令：
   - `/neat-ui`：开关 UI 美化。
@@ -88,14 +91,15 @@ pi -e ./pi-neat-ui/extensions/beautify-ui.ts --theme ./pi-neat-ui/themes/paper-d
 当 provider 返回 prompt cache usage 时，token 段会显示缓存数据：
 
 ```text
-🔢 ↑423k ↓27k R19.6m ⚡94%
+🔢 ↑423k ↓27k R19.6m W0 ⚡94%
 ```
 
 - `↑` 普通输入 token
 - `↓` 输出 token
-- `R` cache-read tokens
-- `W` cache-write tokens，仅非 0 时显示
-- `⚡` 近似缓存命中率：`cacheRead / (input + cacheRead + cacheWrite)`
+- `R` cache-read tokens，始终显示
+- `W` cache-write tokens，始终显示
+- `⚡` 近似缓存命中率，始终显示：`cacheRead / (input + cacheRead + cacheWrite)`
+- `⏱` 当前 pi UI 会话持续时间
 
 如果你同时安装了 `@narumitw/pi-statusline` 或其他 statusline/footer 扩展，建议禁用其中一个，避免多个插件互相覆盖 footer。`/neat-statusline off` 只会清除 pi-neat-ui 的 footer 并恢复 Pi 内置默认 footer，不能恢复另一个扩展之前设置的 footer。
 

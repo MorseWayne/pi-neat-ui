@@ -44,6 +44,7 @@ interface RuntimeState {
 	lastCompletedTool?: string;
 	isStreaming: boolean;
 	thinkingLevel: ThinkingLevel;
+	startedAt: number;
 	requestRender?: () => void;
 }
 
@@ -215,6 +216,7 @@ function buildStatuslineSegments(ctx: any, footerData: any, runtime: RuntimeStat
 		{ text: formatContextUsage(ctx), block: "runtime" },
 		{ text: formatTokenUsage(totals), block: "runtime" },
 		{ text: `💸 $${formatCost(totals.cost)}`, block: "meter" },
+		{ text: `⏱ ${formatDuration(Date.now() - runtime.startedAt)}`, block: "meter" },
 		{ text: `🕒 ${formatTime()}`, block: "meter" },
 	];
 }
@@ -270,12 +272,15 @@ function getTokenTotals(ctx: any): TokenTotals {
 }
 
 function formatTokenUsage(totals: TokenTotals) {
-	if (totals.input === 0 && totals.output === 0 && totals.cacheRead === 0 && totals.cacheWrite === 0) return "🔢 tok 0";
-	const parts = [`↑${formatCount(totals.input)}`, `↓${formatCount(totals.output)}`];
-	if (totals.cacheRead > 0) parts.push(`R${formatCount(totals.cacheRead)}`);
-	if (totals.cacheWrite > 0) parts.push(`W${formatCount(totals.cacheWrite)}`);
 	const denominator = totals.input + totals.cacheRead + totals.cacheWrite;
-	if (totals.cacheRead > 0 && denominator > 0) parts.push(`⚡${Math.round((totals.cacheRead / denominator) * 100)}%`);
+	const hitRate = denominator > 0 ? Math.round((totals.cacheRead / denominator) * 100) : 0;
+	const parts = [
+		`↑${formatCount(totals.input)}`,
+		`↓${formatCount(totals.output)}`,
+		`R${formatCount(totals.cacheRead)}`,
+		`W${formatCount(totals.cacheWrite)}`,
+		`⚡${hitRate}%`,
+	];
 	return `🔢 ${parts.join(" ")}`;
 }
 
@@ -287,6 +292,16 @@ function formatCount(value: number) {
 
 function formatCost(value: number) {
 	return value.toFixed(value >= 1 ? 2 : 3);
+}
+
+function formatDuration(ms: number) {
+	const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+	const hours = Math.floor(totalSeconds / 3600);
+	const minutes = Math.floor((totalSeconds % 3600) / 60);
+	const seconds = totalSeconds % 60;
+	if (hours > 0) return `${hours}h${minutes.toString().padStart(2, "0")}m`;
+	if (minutes > 0) return `${minutes}m${seconds.toString().padStart(2, "0")}s`;
+	return `${seconds}s`;
 }
 
 function formatTime() {
@@ -314,6 +329,14 @@ function shortenModel(model: string) {
 		.replace(/-latest$/, "");
 }
 
+function renderDefaultResult(tool: any, result: any, options: any, theme: any, context: any) {
+	return tool.renderResult?.(result, options, theme, context) ?? renderFullText(textResult(result), theme);
+}
+
+function compactSummary(theme: any, text: string, color: "success" | "error" | "warning" | "toolOutput" = "toolOutput") {
+	return new Text(theme.fg(color, text), 0, 0);
+}
+
 function registerBuiltInToolRenderers(pi: ExtensionAPI, isCompact: () => boolean) {
 	const defaults = getBuiltInToolDefinitions(process.cwd());
 
@@ -322,23 +345,14 @@ function registerBuiltInToolRenderers(pi: ExtensionAPI, isCompact: () => boolean
 		async execute(toolCallId, params, signal, onUpdate, ctx) {
 			return getBuiltInToolDefinitions(ctx.cwd).read.execute(toolCallId, params, signal, onUpdate, ctx);
 		},
-		renderCall(args, theme) {
-			let display = theme.fg("accent", shortenPath(args.path || ""));
-			if (args.offset !== undefined || args.limit !== undefined) {
-				const start = args.offset ?? 1;
-				const end = args.limit !== undefined ? start + args.limit - 1 : "";
-				display += theme.fg("warning", `:${start}${end ? `-${end}` : ""}`);
-			}
-			return new Text(`${theme.fg("toolTitle", theme.bold("read"))} ${display}`, 0, 0);
-		},
-		renderResult(result, { expanded, isPartial }, theme) {
-			if (isPartial) return new Text(theme.fg("warning", "reading..."), 0, 0);
-			const text = textResult(result);
-			if (isCompact() && !expanded) {
+		renderResult(result, options, theme, context) {
+			if (options.isPartial) return compactSummary(theme, "reading...", "warning");
+			if (isCompact() && !options.expanded) {
+				const text = textResult(result);
 				const count = nonEmptyLineCount(text);
-				return new Text(theme.fg("toolOutput", count ? `read: ${count} lines` : "read: done"), 0, 0);
+				return compactSummary(theme, count ? `read: ${count} lines` : "read: done");
 			}
-			return renderFullText(text, theme);
+			return renderDefaultResult(defaults.read, result, options, theme, context);
 		},
 	});
 
@@ -347,20 +361,15 @@ function registerBuiltInToolRenderers(pi: ExtensionAPI, isCompact: () => boolean
 		async execute(toolCallId, params, signal, onUpdate, ctx) {
 			return getBuiltInToolDefinitions(ctx.cwd).bash.execute(toolCallId, params, signal, onUpdate, ctx);
 		},
-		renderCall(args, theme) {
-			const command = args.command.length > 96 ? `${args.command.slice(0, 93)}...` : args.command;
-			return new Text(`${theme.fg("toolTitle", theme.bold("$"))} ${theme.fg("accent", command)}`, 0, 0);
-		},
-		renderResult(result, { expanded, isPartial }, theme, context) {
-			if (isPartial) return new Text(theme.fg("warning", "running..."), 0, 0);
-			const text = textResult(result);
-			if (isCompact() && !expanded) {
-				const lines = nonEmptyLineCount(text);
-				const failed = context.isError;
-				const label = failed ? theme.fg("error", "bash: failed") : theme.fg("success", "bash: done");
-				return new Text(`${label}${theme.fg("dim", ` (${lines} lines)`)}`, 0, 0);
+		renderResult(result, options, theme, context) {
+			if (options.isPartial) return compactSummary(theme, "running...", "warning");
+			if (isCompact() && !options.expanded) {
+				const lines = nonEmptyLineCount(textResult(result));
+				const label = context.isError ? "bash: failed" : "bash: done";
+				const color = context.isError ? "error" : "success";
+				return new Text(`${theme.fg(color, label)}${theme.fg("dim", ` (${lines} lines)`)}`, 0, 0);
 			}
-			return renderFullText(text, theme);
+			return renderDefaultResult(defaults.bash, result, options, theme, context);
 		},
 	});
 
@@ -369,22 +378,16 @@ function registerBuiltInToolRenderers(pi: ExtensionAPI, isCompact: () => boolean
 		async execute(toolCallId, params, signal, onUpdate, ctx) {
 			return getBuiltInToolDefinitions(ctx.cwd).edit.execute(toolCallId, params, signal, onUpdate, ctx);
 		},
-		renderCall(args, theme) {
-			return new Text(`${theme.fg("toolTitle", theme.bold("edit"))} ${theme.fg("accent", shortenPath(args.path || ""))}`, 0, 0);
-		},
-		renderResult(result, { expanded, isPartial }, theme, context) {
-			if (isPartial) return new Text(theme.fg("warning", "editing..."), 0, 0);
-			const text = textResult(result);
-			if (isCompact() && !expanded) {
+		renderResult(result, options, theme, context) {
+			if (options.isPartial) return renderDefaultResult(defaults.edit, result, options, theme, context);
+			if (isCompact() && !options.expanded) {
+				const text = textResult(result);
 				const diff = (result.details as { diff?: string } | undefined)?.diff;
 				const { additions, removals } = countDiff(diff);
-				if (context.isError || text.toLowerCase().includes("error")) {
-					return new Text(theme.fg("error", "edit: failed"), 0, 0);
-				}
-				const stats = additions || removals ? ` +${additions}/-${removals}` : "";
-				return new Text(theme.fg("success", `edit: applied${stats}`), 0, 0);
+				if (context.isError || text.toLowerCase().includes("error")) return compactSummary(theme, "edit: failed", "error");
+				return compactSummary(theme, `edit: applied +${additions}/-${removals}`, "success");
 			}
-			return renderFullText(text, theme);
+			return renderDefaultResult(defaults.edit, result, options, theme, context);
 		},
 	});
 
@@ -393,21 +396,12 @@ function registerBuiltInToolRenderers(pi: ExtensionAPI, isCompact: () => boolean
 		async execute(toolCallId, params, signal, onUpdate, ctx) {
 			return getBuiltInToolDefinitions(ctx.cwd).write.execute(toolCallId, params, signal, onUpdate, ctx);
 		},
-		renderCall(args, theme) {
-			const lines = String(args.content ?? "").split("\n").length;
-			return new Text(
-				`${theme.fg("toolTitle", theme.bold("write"))} ${theme.fg("accent", shortenPath(args.path || ""))}${theme.fg("dim", ` (${lines} lines)`)}`,
-				0,
-				0,
-			);
-		},
-		renderResult(result, { expanded, isPartial }, theme, context) {
-			if (isPartial) return new Text(theme.fg("warning", "writing..."), 0, 0);
-			const text = textResult(result);
-			if (isCompact() && !expanded) {
-				return new Text(theme.fg(context.isError ? "error" : "success", context.isError ? "write: failed" : "write: done"), 0, 0);
+		renderResult(result, options, theme, context) {
+			if (options.isPartial) return compactSummary(theme, "writing...", "warning");
+			if (isCompact() && !options.expanded) {
+				return compactSummary(theme, context.isError ? "write: failed" : "write: done", context.isError ? "error" : "success");
 			}
-			return renderFullText(text, theme);
+			return renderDefaultResult(defaults.write, result, options, theme, context);
 		},
 	});
 
@@ -416,20 +410,12 @@ function registerBuiltInToolRenderers(pi: ExtensionAPI, isCompact: () => boolean
 		async execute(toolCallId, params, signal, onUpdate, ctx) {
 			return getBuiltInToolDefinitions(ctx.cwd).find.execute(toolCallId, params, signal, onUpdate, ctx);
 		},
-		renderCall(args, theme) {
-			return new Text(
-				`${theme.fg("toolTitle", theme.bold("find"))} ${theme.fg("accent", args.pattern || "")}${theme.fg("dim", ` in ${shortenPath(args.path || ".")}`)}`,
-				0,
-				0,
-			);
-		},
-		renderResult(result, { expanded, isPartial }, theme) {
-			if (isPartial) return new Text(theme.fg("warning", "finding..."), 0, 0);
-			const text = textResult(result);
-			if (isCompact() && !expanded) {
-				return new Text(theme.fg("toolOutput", `find: ${nonEmptyLineCount(text)} matches`), 0, 0);
+		renderResult(result, options, theme, context) {
+			if (options.isPartial) return compactSummary(theme, "finding...", "warning");
+			if (isCompact() && !options.expanded) {
+				return compactSummary(theme, `find: ${nonEmptyLineCount(textResult(result))} matches`);
 			}
-			return renderFullText(text, theme);
+			return renderDefaultResult(defaults.find, result, options, theme, context);
 		},
 	});
 
@@ -438,20 +424,12 @@ function registerBuiltInToolRenderers(pi: ExtensionAPI, isCompact: () => boolean
 		async execute(toolCallId, params, signal, onUpdate, ctx) {
 			return getBuiltInToolDefinitions(ctx.cwd).grep.execute(toolCallId, params, signal, onUpdate, ctx);
 		},
-		renderCall(args, theme) {
-			return new Text(
-				`${theme.fg("toolTitle", theme.bold("grep"))} ${theme.fg("accent", `/${args.pattern || ""}/`)} ${theme.fg("dim", `in ${shortenPath(args.path || ".")}`)}`,
-				0,
-				0,
-			);
-		},
-		renderResult(result, { expanded, isPartial }, theme) {
-			if (isPartial) return new Text(theme.fg("warning", "searching..."), 0, 0);
-			const text = textResult(result);
-			if (isCompact() && !expanded) {
-				return new Text(theme.fg("toolOutput", `grep: ${nonEmptyLineCount(text)} matches`), 0, 0);
+		renderResult(result, options, theme, context) {
+			if (options.isPartial) return compactSummary(theme, "searching...", "warning");
+			if (isCompact() && !options.expanded) {
+				return compactSummary(theme, `grep: ${nonEmptyLineCount(textResult(result))} matches`);
 			}
-			return renderFullText(text, theme);
+			return renderDefaultResult(defaults.grep, result, options, theme, context);
 		},
 	});
 
@@ -460,16 +438,12 @@ function registerBuiltInToolRenderers(pi: ExtensionAPI, isCompact: () => boolean
 		async execute(toolCallId, params, signal, onUpdate, ctx) {
 			return getBuiltInToolDefinitions(ctx.cwd).ls.execute(toolCallId, params, signal, onUpdate, ctx);
 		},
-		renderCall(args, theme) {
-			return new Text(`${theme.fg("toolTitle", theme.bold("ls"))} ${theme.fg("accent", shortenPath(args.path || "."))}`, 0, 0);
-		},
-		renderResult(result, { expanded, isPartial }, theme) {
-			if (isPartial) return new Text(theme.fg("warning", "listing..."), 0, 0);
-			const text = textResult(result);
-			if (isCompact() && !expanded) {
-				return new Text(theme.fg("toolOutput", `ls: ${nonEmptyLineCount(text)} entries`), 0, 0);
+		renderResult(result, options, theme, context) {
+			if (options.isPartial) return compactSummary(theme, "listing...", "warning");
+			if (isCompact() && !options.expanded) {
+				return compactSummary(theme, `ls: ${nonEmptyLineCount(textResult(result))} entries`);
 			}
-			return renderFullText(text, theme);
+			return renderDefaultResult(defaults.ls, result, options, theme, context);
 		},
 	});
 }
@@ -484,6 +458,7 @@ export default function (pi: ExtensionAPI) {
 		activeTools: new Map(),
 		isStreaming: false,
 		thinkingLevel: "off",
+		startedAt: Date.now(),
 	};
 
 	const refreshStatusline = () => runtime.requestRender?.();
@@ -560,6 +535,7 @@ export default function (pi: ExtensionAPI) {
 	}
 
 	pi.on("session_start", async (_event, ctx: any) => {
+		runtime.startedAt = Date.now();
 		runtime.thinkingLevel = pi.getThinkingLevel();
 		if (enabled) applyBeautify(ctx);
 	});

@@ -10,14 +10,17 @@ A local **pi** UI polish package: extension + themes.
 
 - Built-in powerline/emoji statusline with the same visual style as `@narumitw/pi-statusline`.
 - Cache-aware token segment:
-  - `R` shows cache-read tokens;
-  - `W` shows cache-write tokens;
-  - `⚡` shows approximate cache hit rate.
+  - `R` shows cache-read tokens, displayed even when zero;
+  - `W` shows cache-write tokens, displayed even when zero;
+  - `⚡` shows approximate cache hit rate, displayed even when `0%`.
+- Session duration segment (`⏱`).
 - Custom startup Header.
 - Lightweight editor hint Widget.
 - Custom working indicator.
 - Compact tool rendering:
   - collapsed mode shows short summaries such as `bash: done (3 lines)` or `grep: 12 matches`;
+  - expanded/verbose mode falls back to pi's built-in renderers to keep syntax/diff highlighting;
+  - edit calls keep pi's dynamic diff preview with add/remove line counts;
   - press `Ctrl+O` to expand details when needed.
 - Slash commands:
   - `/neat-ui` — toggle the extension UI polish.
@@ -88,14 +91,15 @@ The extension is enabled by default after loading.
 When the provider reports prompt-cache usage, the token segment shows cache data:
 
 ```text
-🔢 ↑423k ↓27k R19.6m ⚡94%
+🔢 ↑423k ↓27k R19.6m W0 ⚡94%
 ```
 
 - `↑` normal input tokens
 - `↓` output tokens
-- `R` cache-read tokens
-- `W` cache-write tokens, shown only when non-zero
-- `⚡` approximate cache hit rate: `cacheRead / (input + cacheRead + cacheWrite)`
+- `R` cache-read tokens, always shown
+- `W` cache-write tokens, always shown
+- `⚡` approximate cache hit rate, always shown: `cacheRead / (input + cacheRead + cacheWrite)`
+- `⏱` current pi UI session duration
 
 If you also have `@narumitw/pi-statusline` or another statusline/footer extension installed, disable one of them to avoid footer override races. `/neat-statusline off` clears pi-neat-ui's footer and restores Pi's built-in default footer; it cannot restore another extension's previous footer.
 
