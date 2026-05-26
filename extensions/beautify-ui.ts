@@ -8,8 +8,7 @@
  * - /neat-theme：切换已发现主题
  */
 
-import { basename, dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { basename } from "node:path";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import {
 	createBashToolDefinition,
@@ -21,9 +20,6 @@ import {
 	createWriteToolDefinition,
 } from "@earendil-works/pi-coding-agent";
 import { Text, truncateToWidth } from "@earendil-works/pi-tui";
-
-const baseDir = dirname(fileURLToPath(import.meta.url));
-const themesDir = join(baseDir, "..", "themes");
 
 const LOGO = [
 	"",
@@ -452,10 +448,6 @@ export default function (pi: ExtensionAPI) {
 	};
 
 	const refreshStatusline = () => runtime.requestRender?.();
-
-	pi.on("resources_discover", () => ({
-		themePaths: [themesDir],
-	}));
 
 	registerBuiltInToolRenderers(pi, () => compactTools);
 
