@@ -4,13 +4,15 @@
 
 A local **pi** UI polish package: extension + themes.
 
-`pi-neat-ui` keeps pi's default statusline untouched, while improving the surrounding UI with a custom header, hint widget, working indicator, compact tool rendering, and theme presets.
+`pi-neat-ui` provides a polished powerline-style statusline, custom header, hint widget, working indicator, compact tool rendering, and theme presets.
 
 ## Features
 
-- Keeps the default pi statusline/Footer unchanged.
-  - No `ctx.ui.setFooter()` override.
-  - No `ctx.ui.setStatus()` injection into the default statusline.
+- Built-in powerline/emoji statusline with the same visual style as `@narumitw/pi-statusline`.
+- Cache-aware token segment:
+  - `R` shows cache-read tokens;
+  - `W` shows cache-write tokens;
+  - `⚡` shows approximate cache hit rate.
 - Custom startup Header.
 - Lightweight editor hint Widget.
 - Custom working indicator.
@@ -19,6 +21,7 @@ A local **pi** UI polish package: extension + themes.
   - press `Ctrl+O` to expand details when needed.
 - Slash commands:
   - `/neat-ui` — toggle the extension UI polish.
+  - `/neat-statusline` — toggle the built-in statusline.
   - `/neat-tools` — switch tool rendering between `compact` and `verbose`.
   - `/neat-style` — switch layout density between `compact` and `spacious`.
   - `/neat-theme` — list or switch available themes.
@@ -68,6 +71,9 @@ The extension is enabled by default after loading.
 
 ```text
 /neat-ui                 # Toggle UI polish
+/neat-statusline         # Toggle built-in statusline
+/neat-statusline off     # Restore default/other footer
+/neat-statusline on      # Enable pi-neat-ui statusline
 /neat-tools              # Toggle compact/verbose tool rendering
 /neat-tools verbose      # Show full tool output
 /neat-tools compact      # Show compact summaries
@@ -76,6 +82,22 @@ The extension is enabled by default after loading.
 /neat-theme neon-aurora  # Switch to dark theme
 /neat-theme paper-dawn   # Switch to light theme
 ```
+
+## Statusline cache display
+
+When the provider reports prompt-cache usage, the token segment shows cache data:
+
+```text
+🔢 ↑423k ↓27k R19.6m ⚡94%
+```
+
+- `↑` normal input tokens
+- `↓` output tokens
+- `R` cache-read tokens
+- `W` cache-write tokens, shown only when non-zero
+- `⚡` approximate cache hit rate: `cacheRead / (input + cacheRead + cacheWrite)`
+
+If you also have `@narumitw/pi-statusline` installed, disable one of the two statusline extensions to avoid footer override races.
 
 ## `/neat-tools` vs `Ctrl+O`
 
@@ -109,4 +131,4 @@ You can also run the workflow manually from GitHub Actions with `publish=true`.
 
 `/neat-tools compact` does not affect tool execution. It only changes how tool results are rendered in the TUI.
 
-This extension intentionally does **not** replace pi's default statusline.
+The statusline renderer is inspired by `@narumitw/pi-statusline`; see [NOTICE.md](./NOTICE.md).

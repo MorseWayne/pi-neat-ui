@@ -4,13 +4,15 @@
 
 一个用于 **pi** 的本地 UI 美化包：扩展 + 主题套件。
 
-`pi-neat-ui` 会保留 pi 默认 statusline，不覆盖底栏，只增强周边 UI：自定义 Header、提示 Widget、working indicator、工具输出紧凑渲染，以及主题预设。
+`pi-neat-ui` 内置 powerline 风格 statusline，同时提供自定义 Header、提示 Widget、working indicator、工具输出紧凑渲染，以及主题预设。
 
 ## 功能
 
-- 保留 pi 默认 statusline/Footer。
-  - 不调用 `ctx.ui.setFooter()` 覆盖默认底栏。
-  - 不调用 `ctx.ui.setStatus()` 往默认 statusline 追加状态行。
+- 内置 powerline/emoji statusline，视觉风格保持 `@narumitw/pi-statusline` 的样式。
+- 缓存感知 token 段：
+  - `R` 表示 cache-read tokens；
+  - `W` 表示 cache-write tokens；
+  - `⚡` 表示近似缓存命中率。
 - 自定义启动 Header。
 - 轻量编辑器提示 Widget。
 - 自定义 working indicator。
@@ -19,6 +21,7 @@
   - 需要细节时按 `Ctrl+O` 展开。
 - 内置命令：
   - `/neat-ui`：开关 UI 美化。
+  - `/neat-statusline`：开关内置 statusline。
   - `/neat-tools`：切换工具渲染 `compact` / `verbose`。
   - `/neat-style`：切换布局密度 `compact` / `spacious`。
   - `/neat-theme`：列出或切换可用主题。
@@ -68,6 +71,9 @@ pi -e ./pi-neat-ui/extensions/beautify-ui.ts --theme ./pi-neat-ui/themes/paper-d
 
 ```text
 /neat-ui                 # 开关美化
+/neat-statusline         # 开关内置 statusline
+/neat-statusline off     # 恢复默认/其他 footer
+/neat-statusline on      # 启用 pi-neat-ui statusline
 /neat-tools              # compact/verbose 之间切换
 /neat-tools verbose      # 显示完整工具输出
 /neat-tools compact      # 折叠为摘要
@@ -76,6 +82,22 @@ pi -e ./pi-neat-ui/extensions/beautify-ui.ts --theme ./pi-neat-ui/themes/paper-d
 /neat-theme neon-aurora  # 切深色主题
 /neat-theme paper-dawn   # 切浅色主题
 ```
+
+## Statusline 缓存显示
+
+当 provider 返回 prompt cache usage 时，token 段会显示缓存数据：
+
+```text
+🔢 ↑423k ↓27k R19.6m ⚡94%
+```
+
+- `↑` 普通输入 token
+- `↓` 输出 token
+- `R` cache-read tokens
+- `W` cache-write tokens，仅非 0 时显示
+- `⚡` 近似缓存命中率：`cacheRead / (input + cacheRead + cacheWrite)`
+
+如果你同时安装了 `@narumitw/pi-statusline`，建议禁用其中一个 statusline 扩展，避免两个插件互相覆盖 footer。
 
 ## `/neat-tools` 和 `Ctrl+O` 的区别
 
@@ -109,4 +131,4 @@ workflow 会用 `npm pack --dry-run` 校验包内容，并在 tag 触发时使�
 
 `/neat-tools compact` 不会影响工具执行，只改变工具结果在 TUI 中的展示方式。
 
-本插件刻意不替换 pi 默认 statusline。
+Statusline 渲染灵感来自 `@narumitw/pi-statusline`；详见 [NOTICE.md](./NOTICE.md)。
