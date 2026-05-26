@@ -20,7 +20,7 @@ A local **pi** UI polish package: extension + themes.
 - Compact tool rendering:
   - collapsed mode shows short summaries such as `bash: done (3 lines)` or `grep: 12 matches`;
   - expanded/verbose mode falls back to pi's built-in renderers to keep syntax/diff highlighting;
-  - edit calls keep pi's dynamic diff preview with add/remove line counts;
+  - edit calls use pi's built-in renderer so the dynamic diff preview and add/remove line counts stay accurate;
   - press `Ctrl+O` to expand details when needed.
 - Slash commands:
   - `/neat-ui` — toggle the extension UI polish.
@@ -99,7 +99,7 @@ When the provider reports prompt-cache usage, the token segment shows cache data
 - `R` cache-read tokens, always shown
 - `W` cache-write tokens, always shown
 - `⚡` approximate cache hit rate, always shown: `cacheRead / (input + cacheRead + cacheWrite)`
-- `⏱` current pi UI session duration
+- `⏱` current pi UI session duration, minute-level display
 
 If you also have `@narumitw/pi-statusline` or another statusline/footer extension installed, disable one of them to avoid footer override races. `/neat-statusline off` clears pi-neat-ui's footer and restores Pi's built-in default footer; it cannot restore another extension's previous footer.
 

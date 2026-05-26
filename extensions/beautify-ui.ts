@@ -295,13 +295,11 @@ function formatCost(value: number) {
 }
 
 function formatDuration(ms: number) {
-	const totalSeconds = Math.max(0, Math.floor(ms / 1000));
-	const hours = Math.floor(totalSeconds / 3600);
-	const minutes = Math.floor((totalSeconds % 3600) / 60);
-	const seconds = totalSeconds % 60;
+	const totalMinutes = Math.max(0, Math.floor(ms / 60_000));
+	const hours = Math.floor(totalMinutes / 60);
+	const minutes = totalMinutes % 60;
 	if (hours > 0) return `${hours}h${minutes.toString().padStart(2, "0")}m`;
-	if (minutes > 0) return `${minutes}m${seconds.toString().padStart(2, "0")}s`;
-	return `${seconds}s`;
+	return `${minutes}m`;
 }
 
 function formatTime() {
@@ -379,14 +377,6 @@ function registerBuiltInToolRenderers(pi: ExtensionAPI, isCompact: () => boolean
 			return getBuiltInToolDefinitions(ctx.cwd).edit.execute(toolCallId, params, signal, onUpdate, ctx);
 		},
 		renderResult(result, options, theme, context) {
-			if (options.isPartial) return renderDefaultResult(defaults.edit, result, options, theme, context);
-			if (isCompact() && !options.expanded) {
-				const text = textResult(result);
-				const diff = (result.details as { diff?: string } | undefined)?.diff;
-				const { additions, removals } = countDiff(diff);
-				if (context.isError || text.toLowerCase().includes("error")) return compactSummary(theme, "edit: failed", "error");
-				return compactSummary(theme, `edit: applied +${additions}/-${removals}`, "success");
-			}
 			return renderDefaultResult(defaults.edit, result, options, theme, context);
 		},
 	});
@@ -489,7 +479,7 @@ export default function (pi: ExtensionAPI) {
 		ctx.ui.setFooter((tui, _theme, footerData) => {
 			runtime.requestRender = () => tui.requestRender();
 			const unsubscribeBranch = footerData.onBranchChange(() => tui.requestRender());
-			const clock = setInterval(() => tui.requestRender(), 30_000);
+			const clock = setInterval(() => tui.requestRender(), 60_000);
 			return {
 				dispose() {
 					unsubscribeBranch();

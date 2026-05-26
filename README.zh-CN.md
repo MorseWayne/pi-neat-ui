@@ -20,7 +20,7 @@
 - 工具输出紧凑渲染：
   - 折叠时只显示摘要，例如 `bash: done (3 lines)` 或 `grep: 12 matches`；
   - 展开/verbose 模式回退到 pi 内置渲染器，保留语法/差异高亮；
-  - edit 调用保留 pi 的动态 diff 预览与增删行数；
+  - edit 调用使用 pi 内置渲染器，保证动态 diff 预览与增删行数准确；
   - 需要细节时按 `Ctrl+O` 展开。
 - 内置命令：
   - `/neat-ui`：开关 UI 美化。
@@ -99,7 +99,7 @@ pi -e ./pi-neat-ui/extensions/beautify-ui.ts --theme ./pi-neat-ui/themes/paper-d
 - `R` cache-read tokens，始终显示
 - `W` cache-write tokens，始终显示
 - `⚡` 近似缓存命中率，始终显示：`cacheRead / (input + cacheRead + cacheWrite)`
-- `⏱` 当前 pi UI 会话持续时间
+- `⏱` 当前 pi UI 会话持续时间，按分钟级显示
 
 如果你同时安装了 `@narumitw/pi-statusline` 或其他 statusline/footer 扩展，建议禁用其中一个，避免多个插件互相覆盖 footer。`/neat-statusline off` 只会清除 pi-neat-ui 的 footer 并恢复 Pi 内置默认 footer，不能恢复另一个扩展之前设置的 footer。
 

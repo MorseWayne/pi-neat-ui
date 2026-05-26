@@ -1,6 +1,6 @@
 {
   "name": "pi-neat-ui",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Pi extension package: UI beautification, compact tool rendering, and theme presets",
   "license": "MIT",
   "repository": {
