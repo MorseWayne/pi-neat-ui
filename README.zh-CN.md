@@ -28,6 +28,7 @@
   - `/neat-tools`：切换工具渲染 `compact` / `verbose`。
   - `/neat-style`：切换布局密度 `compact` / `spacious`。
   - `/neat-theme`：列出或切换可用主题。
+- 默认主题：Pi 内置 `dark` 主题。
 - 附带主题：
   - `neon-aurora`：深色霓虹风。
   - `paper-dawn`：浅色纸张风。
@@ -40,10 +41,10 @@
 pi install github:MorseWayne/pi-neat-ui
 ```
 
-然后使用主题启动：
+然后启动 pi。扩展会默认应用 Pi 内置 dark 主题：
 
 ```bash
-pi --theme neon-aurora
+pi
 ```
 
 ### 方式二：项目本地包
@@ -59,14 +60,10 @@ pi --theme neon-aurora
 ### 方式三：开发阶段直接加载
 
 ```bash
-pi -e ./pi-neat-ui/extensions/beautify-ui.ts --theme ./pi-neat-ui/themes/neon-aurora.json
+pi -e ./pi-neat-ui/extensions/beautify-ui.ts
 ```
 
-浅色主题：
-
-```bash
-pi -e ./pi-neat-ui/extensions/beautify-ui.ts --theme ./pi-neat-ui/themes/paper-dawn.json
-```
+运行后可用 `/neat-theme neon-aurora` 或 `/neat-theme paper-dawn` 切换主题。
 
 ## 使用
 
@@ -82,7 +79,8 @@ pi -e ./pi-neat-ui/extensions/beautify-ui.ts --theme ./pi-neat-ui/themes/paper-d
 /neat-tools compact      # 折叠为摘要
 /neat-style              # compact/spacious 之间切换
 /neat-theme              # 列出可用主题
-/neat-theme neon-aurora  # 切深色主题
+/neat-theme dark         # 切到 Pi 内置 dark 主题
+/neat-theme neon-aurora  # 切深色霓虹主题
 /neat-theme paper-dawn   # 切浅色主题
 ```
 

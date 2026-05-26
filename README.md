@@ -28,6 +28,7 @@ A local **pi** UI polish package: extension + themes.
   - `/neat-tools` — switch tool rendering between `compact` and `verbose`.
   - `/neat-style` — switch layout density between `compact` and `spacious`.
   - `/neat-theme` — list or switch available themes.
+- Default theme: Pi's built-in `dark` theme.
 - Included themes:
   - `neon-aurora` — dark neon theme.
   - `paper-dawn` — light paper-like theme.
@@ -40,10 +41,10 @@ A local **pi** UI polish package: extension + themes.
 pi install github:MorseWayne/pi-neat-ui
 ```
 
-Then start pi with the theme:
+Then start pi. The extension applies Pi's built-in dark theme by default:
 
 ```bash
-pi --theme neon-aurora
+pi
 ```
 
 ### Option 2: Local project package
@@ -59,14 +60,10 @@ Put this folder in your project and configure `.pi/settings.json`:
 ### Option 3: Direct development loading
 
 ```bash
-pi -e ./pi-neat-ui/extensions/beautify-ui.ts --theme ./pi-neat-ui/themes/neon-aurora.json
+pi -e ./pi-neat-ui/extensions/beautify-ui.ts
 ```
 
-Light theme:
-
-```bash
-pi -e ./pi-neat-ui/extensions/beautify-ui.ts --theme ./pi-neat-ui/themes/paper-dawn.json
-```
+Switch themes at runtime with `/neat-theme neon-aurora` or `/neat-theme paper-dawn`.
 
 ## Usage
 
@@ -82,7 +79,8 @@ The extension is enabled by default after loading.
 /neat-tools compact      # Show compact summaries
 /neat-style              # Toggle compact/spacious layout
 /neat-theme              # List available themes
-/neat-theme neon-aurora  # Switch to dark theme
+/neat-theme dark         # Switch to Pi's built-in dark theme
+/neat-theme neon-aurora  # Switch to dark neon theme
 /neat-theme paper-dawn   # Switch to light theme
 ```
 

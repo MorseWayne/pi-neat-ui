@@ -442,7 +442,7 @@ export default function (pi: ExtensionAPI) {
 	let enabled = true;
 	let compactTools = true;
 	let style: ToolStyle = "compact";
-	let preferredTheme = "neon-aurora";
+	let preferredTheme = "dark";
 	let statuslineEnabled = true;
 	const runtime: RuntimeState = {
 		activeTools: new Map(),
